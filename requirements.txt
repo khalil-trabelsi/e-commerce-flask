@@ -1,0 +1,16 @@
+flask~=3.0.3
+flask-sqlalchemy
+marshmallow~=3.21.3
+flask_restx
+flask-login
+python-dotenv~=1.0.1
+flask_migrate
+psycopg2-binary
+sqlalchemy~=2.0.31
+marshmallow-jsonschema
+setuptools
+marshmallow_sqlalchemy
+attrs~=24.1.0
+alembic~=1.13.2
+flask-jwt-extended
+flask-cors
