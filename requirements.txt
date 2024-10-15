@@ -14,3 +14,5 @@ attrs~=24.1.0
 alembic~=1.13.2
 flask-jwt-extended
 flask-cors
+pyopenssl
+Flask-Mail

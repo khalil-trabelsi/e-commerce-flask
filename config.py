@@ -16,6 +16,7 @@ class DevelopmentConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URI')
     DEVELOPMENT = True
     JWT_COOKIE_SECURE = False
+    SSL_CONTEXT = 'adhoc'
 
 
 
