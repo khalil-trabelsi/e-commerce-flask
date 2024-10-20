@@ -6,7 +6,6 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 from typing import Optional, List
 import os
-import re
 
 from db import db
 from src.models.product import Product
@@ -22,8 +21,11 @@ class ProductHandler:
 
     @classmethod
     def get_all_products(cls):
-        logger.info(Product.query.all())
-        return Product.query.all()
+        products = Product.query.all()
+        for product in products:
+            for image in product.images:
+                image.image_url = url_for('static_uploaded_file', filename=image.image_url, _external=True)
+        return products
 
     @classmethod
     def get_product_by_id(cls, product_id):
@@ -37,10 +39,11 @@ class ProductHandler:
             tva: float,
             brand_id: int,
             category_id: int,
+            collection_id: int,
             description: Optional[str] = None,
     ):
         try:
-            new_product = Product(name=name, price_ht=price_ht, tva=tva, brand_id=brand_id, category_id=category_id, description=description)
+            new_product = Product(name=name, price_ht=price_ht, tva=tva, brand_id=brand_id, category_id=category_id, description=description, collection_id=collection_id)
             db.session.add(new_product)
             db.session.commit()
             return new_product
@@ -64,8 +67,7 @@ class ProductHandler:
                 file_path = os.path.join(upload_folder, filename)
                 f.save(file_path)
                 paths.append(file_path)
-                product_image = ProductImages(product_id, url_for('products_serve_image', filename=filename, _external=True)
-)
+                product_image = ProductImages(product_id, filename)
                 db.session.add(product_image)
                 db.session.commit()
 

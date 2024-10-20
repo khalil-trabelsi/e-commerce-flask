@@ -1,7 +1,6 @@
-import base64
 import os.path
 from logging import getLogger
-from flask import request,send_file,jsonify
+from flask import request
 from flask_jwt_extended import jwt_required
 from flask_restx import Resource, Namespace,ValidationError
 from werkzeug.datastructures import FileStorage
@@ -29,7 +28,7 @@ product_get_model = product_api.schema_model(
     'ProductGetModel', JSONSchema().dump(product_get_schema)['definitions']['ProductSchema']
 )
 
-product_post_schema = ProductSchema(only=('name', 'price_ht', 'tva', 'brand_id', 'category_id'))
+product_post_schema = ProductSchema(only=('name', 'price_ht', 'tva', 'brand_id', 'category_id', 'collection_id'))
 product_post_model = product_api.schema_model(
     'ProductPostModel', JSONSchema().dump(product_post_schema)['definitions']['ProductSchema']
 )
@@ -50,7 +49,6 @@ upload_parser.add_argument('files', location='files', type=FileStorage, required
 
 @product_api.route('')
 class ProductCollectionWeb(Resource):
-    @jwt_required()
     @product_api.response(200, 'Success', [product_get_model])
     @product_api.response(500, 'Internal Server Error')
     def get(self):
@@ -105,14 +103,3 @@ class ProductUploadWeb(Resource):
         except Exception as e:
             return {'error': str(e)}, 500
 
-
-@product_api.route('/images/<string:filename>')
-class ServeImage(Resource):
-    @jwt_required()
-    @product_api.response(200, 'Success')
-    def get(self, filename):
-        file_path = os.path.join(get_upload_folder(), filename)
-        if os.path.exists(file_path):
-            return send_file(file_path, as_attachment=False)
-        else:
-            return jsonify({'error': 'File not found'}), 404

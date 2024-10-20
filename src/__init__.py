@@ -13,6 +13,8 @@ from src.models.user import User, TokenBlockList
 from flask_cors import CORS
 from flask_mail import Mail
 
+from src.web import brand_web
+
 load_dotenv()
 
 migrate = Migrate()
@@ -34,16 +36,20 @@ def create_app(config_name):
         JWT_TOKEN_LOCATION=['headers', 'cookies'],
         MAX_CONTENT_LENGTH=16 * 1024 * 1024,
         MAIL_SERVER=os.getenv('MAIL_SERVER'),
-        # MAIL_PASSWORD=os.getenv('MAIL_PASSWORD'),
+        MAIL_PASSWORD=os.getenv('MAIL_PASSWORD'),
+        MAIL_PORT=os.getenv('MAIL_PORT'),
+        MAIL_USE_TLS=os.getenv('MAIL_USE_TLS'),
+        MAIL_USE_SSL=os.getenv('MAIL_USE_SSL'),
+        MAIL_USERNAME=os.getenv('MAIL_USERNAME'),
         SECURITY_PASSWORD_SALT=os.getenv('SECURITY_PASSWORD_SALT'),
     )
     app.config.from_object(config_name)
     # app.config["MAIL_SERVER"] = "smtp.gmail.com",
-    app.config['MAIL_PORT'] = 465
-    app.config['MAIL_USERNAME'] = "trabelsiikhalil10@gmail.com"
-    app.config['MAIL_PASSWORD'] = "udus exvt cfte ytlp"
-    app.config['MAIL_USE_TLS'] = False
-    app.config['MAIL_USE_SSL'] = True
+    # app.config['MAIL_PORT'] = 465
+    # app.config['MAIL_USERNAME'] = "trabelsiikhalil10@gmail.com"
+    # app.config['MAIL_PASSWORD'] = "udus exvt cfte ytlp"
+    # app.config['MAIL_USE_TLS'] = False
+    # app.config['MAIL_USE_SSL'] = True
 
     # initialize extensions
     db.init_app(app)
@@ -72,6 +78,8 @@ def create_app(config_name):
     from src.web.product_web import product_api
     from src.web.stock_movement_web import stock_movement_api
     from src.web.customer_web import customer_api
+    from src.web.collection_web import collection_api
+    from src.web.uploaded_file_web import uploaded_file_api
 
     api.add_namespace(admin_api)
     api.add_namespace(auth_api)
@@ -82,6 +90,8 @@ def create_app(config_name):
     api.add_namespace(product_api)
     api.add_namespace(stock_movement_api)
     api.add_namespace(customer_api)
+    api.add_namespace(collection_api)
+    api.add_namespace(uploaded_file_api)
 
     # identify authenticated user
     @jwtManager.user_identity_loader

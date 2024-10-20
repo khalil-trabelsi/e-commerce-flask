@@ -35,7 +35,6 @@ category_put_model = category_api.schema_model(
 
 @category_api.route('')
 class CategoryCollectionWeb(Resource):
-    @jwt_required()
     @category_api.response(200, 'Success', [category_get_model])
     @category_api.response(500, 'Internal Server Error')
     def get(self):
@@ -71,7 +70,6 @@ class CategoryAggregatedWeb(Resource):
 
 @category_api.route('/<int:category_id>')
 class CategoryWeb(Resource):
-    @jwt_required()
     @category_api.response(200, 'Success', category_get_model)
     @category_api.response(404, 'Category not found', category_get_model)
     @category_api.response(500, 'Internal Server Error', category_get_model)

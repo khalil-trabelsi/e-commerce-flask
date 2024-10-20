@@ -1,9 +1,12 @@
 import os
+
+
 class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DEBUG = False
     TESTING = False
     CSRF_ENABLED = True
+    UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', r'C:\data\uploads')
 
 
 class ProductionConfig(Config):
@@ -17,7 +20,6 @@ class DevelopmentConfig(Config):
     DEVELOPMENT = True
     JWT_COOKIE_SECURE = False
     SSL_CONTEXT = 'adhoc'
-
 
 
 class TestingConfig(Config):

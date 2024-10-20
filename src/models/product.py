@@ -5,6 +5,7 @@ from db import db
 from .product_images import ProductImages, ProductImagesSchema
 from .brand import Brand, BrandSchema
 from .category import Category, CategorySchema
+from .collection import Collection, CollectionSchema
 
 
 class Product(db.Model):
@@ -17,14 +18,16 @@ class Product(db.Model):
     description = db.Column(db.Text, nullable=True)
     brand_id = db.Column(db.Integer, db.ForeignKey('brands.id'), nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
+    collection_id = db.Column(db.Integer, db.ForeignKey('collections.id'), nullable=True)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now(timezone.utc))
     available = db.Column(db.Boolean, nullable=False, default=False)
     stock = db.Column(db.Integer, nullable=False)
     images = db.relationship('ProductImages', backref='product', lazy='joined')
     brand = db.relationship('Brand', backref='product', lazy='joined')
     category = db.relationship('Category', backref='product', lazy='joined')
+    collection = db.relationship('Collection', backref='product', lazy='joined')
 
-    def __init__(self, name, price_ht, tva, description, brand_id, category_id):
+    def __init__(self, name, price_ht, tva, description, brand_id, category_id, collection_id):
         self.name = name
         self.price_ht = price_ht
         self.tva = tva
@@ -35,6 +38,7 @@ class Product(db.Model):
         self.stock = 0
         self.available = False
         self.price = price_ht + (price_ht * (tva / 100))
+        self.collection_id = self.collection_id
 
     def __repr__(self):
         return 'Product %r' % self.images
@@ -51,3 +55,4 @@ class ProductSchema(SQLAlchemyAutoSchema):
     alt_text = fields.String(allow_none=True)
     brand = fields.Nested(BrandSchema, only=['name'])
     category = fields.Nested(CategorySchema, only=['name'])
+    collection = fields.Nested(CollectionSchema, only=['name'])
