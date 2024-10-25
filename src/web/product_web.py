@@ -28,7 +28,7 @@ product_get_model = product_api.schema_model(
     'ProductGetModel', JSONSchema().dump(product_get_schema)['definitions']['ProductSchema']
 )
 
-product_post_schema = ProductSchema(only=('name', 'price_ht', 'tva', 'brand_id', 'category_id', 'collection_id'))
+product_post_schema = ProductSchema(only=('name', 'price_ht', 'tva', 'brand_id', 'category_id', 'collection_id', 'features'))
 product_post_model = product_api.schema_model(
     'ProductPostModel', JSONSchema().dump(product_post_schema)['definitions']['ProductSchema']
 )
@@ -45,6 +45,7 @@ product_images_post_model = product_api.schema_model(
 
 upload_parser = product_api.parser()
 upload_parser.add_argument('files', location='files', type=FileStorage, required=True, action='append', help='Fichiers à uploader')
+upload_parser.add_argument('main_image', type=str, required=True)
 
 
 @product_api.route('')
@@ -81,7 +82,6 @@ class ProductCollectionWeb(Resource):
 
 @product_api.route('/<int:product_id>')
 class ProductWeb(Resource):
-    @jwt_required()
     @product_api.response(200, 'Success', product_get_model)
     @product_api.response(500, 'Internal Server Error')
     def get(self, product_id):
@@ -97,7 +97,8 @@ class ProductUploadWeb(Resource):
     def post(self, product_id: int):
         try:
             files = request.files.getlist('files')
-            paths = ProductHandler.add_product_images(product_id, files)
+            main_image = request.values.get('main_image')
+            paths = ProductHandler.add_product_images(product_id, files, main_image)
             logger.info(paths)
             return paths, 201
         except Exception as e:

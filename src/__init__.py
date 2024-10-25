@@ -44,12 +44,6 @@ def create_app(config_name):
         SECURITY_PASSWORD_SALT=os.getenv('SECURITY_PASSWORD_SALT'),
     )
     app.config.from_object(config_name)
-    # app.config["MAIL_SERVER"] = "smtp.gmail.com",
-    # app.config['MAIL_PORT'] = 465
-    # app.config['MAIL_USERNAME'] = "trabelsiikhalil10@gmail.com"
-    # app.config['MAIL_PASSWORD'] = "udus exvt cfte ytlp"
-    # app.config['MAIL_USE_TLS'] = False
-    # app.config['MAIL_USE_SSL'] = True
 
     # initialize extensions
     db.init_app(app)

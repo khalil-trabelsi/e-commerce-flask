@@ -11,11 +11,13 @@ class ProductImages(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey('products.id'))
     image_url = db.Column(db.String(255))
     alt_text = db.Column(db.String(255), nullable=True)
+    main_image = db.Column(db.Boolean, nullable=True, default=False)
 
-    def __init__(self, product_id, image_url, alt_text: Optional[str] = None):
+    def __init__(self, product_id, image_url, alt_text: Optional[str] = None, main_image: Optional[bool] = False):
         self.product_id = product_id
         self.image_url = image_url
         self.alt_text = alt_text
+        self.main_image = main_image
 
 
 class ProductImagesSchema(SQLAlchemyAutoSchema):

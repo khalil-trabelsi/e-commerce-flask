@@ -4,13 +4,13 @@ from logging import getLogger
 
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
-from typing import Optional, List
+from typing import Optional, List, Dict
 import os
 
 from db import db
 from src.models.product import Product
 from src.helpers.FileConf import allowed_file, get_upload_folder
-
+from src.models.product_feature import ProductFeatures
 
 from src.models.product_images import ProductImages
 
@@ -29,6 +29,9 @@ class ProductHandler:
 
     @classmethod
     def get_product_by_id(cls, product_id):
+        products = Product.query.filter_by(id=product_id).first_or_404()
+        for image in products.images:
+            image.image_url = url_for('static_uploaded_file', filename=image.image_url, _external=True)
         return Product.query.filter_by(id=product_id).first_or_404()
 
     @classmethod
@@ -40,12 +43,17 @@ class ProductHandler:
             brand_id: int,
             category_id: int,
             collection_id: int,
-            description: Optional[str] = None,
+            features: List[Dict[str, str]],
     ):
         try:
-            new_product = Product(name=name, price_ht=price_ht, tva=tva, brand_id=brand_id, category_id=category_id, description=description, collection_id=collection_id)
+            new_product = Product(name=name, price_ht=price_ht, tva=tva, brand_id=brand_id, category_id=category_id, collection_id=collection_id)
             db.session.add(new_product)
             db.session.commit()
+
+            for feature in features:
+                product_feature = ProductFeatures(label=feature['label'], product_id=new_product.id)
+                db.session.add(product_feature)
+                db.session.commit()
             return new_product
 
         except IntegrityError as e:
@@ -57,7 +65,7 @@ class ProductHandler:
             raise e
 
     @classmethod
-    def add_product_images(cls, product_id: int, files: List[FileStorage]):
+    def add_product_images(cls, product_id: int, files: List[FileStorage], main_image: str):
         paths = []
         upload_folder = get_upload_folder()
         for f in files:
@@ -67,7 +75,10 @@ class ProductHandler:
                 file_path = os.path.join(upload_folder, filename)
                 f.save(file_path)
                 paths.append(file_path)
-                product_image = ProductImages(product_id, filename)
+                if filename == main_image:
+                    product_image = ProductImages(product_id, filename, main_image=True)
+                else:
+                    product_image = ProductImages(product_id, filename)
                 db.session.add(product_image)
                 db.session.commit()
 

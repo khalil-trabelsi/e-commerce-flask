@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from marshmallow import EXCLUDE, fields
 from db import db
+from .product_feature import ProductFeaturesSchema
 from .product_images import ProductImages, ProductImagesSchema
 from .brand import Brand, BrandSchema
 from .category import Category, CategorySchema
@@ -15,7 +16,6 @@ class Product(db.Model):
     price_ht = db.Column(db.Float, nullable=False)
     tva = db.Column(db.Float, nullable=False)
     price = db.Column(db.Float, nullable=False)
-    description = db.Column(db.Text, nullable=True)
     brand_id = db.Column(db.Integer, db.ForeignKey('brands.id'), nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
     collection_id = db.Column(db.Integer, db.ForeignKey('collections.id'), nullable=True)
@@ -26,12 +26,12 @@ class Product(db.Model):
     brand = db.relationship('Brand', backref='product', lazy='joined')
     category = db.relationship('Category', backref='product', lazy='joined')
     collection = db.relationship('Collection', backref='product', lazy='joined')
+    features = db.relationship('ProductFeatures', backref='product', lazy='joined')
 
-    def __init__(self, name, price_ht, tva, description, brand_id, category_id, collection_id):
+    def __init__(self, name, price_ht, tva, brand_id, category_id, collection_id):
         self.name = name
         self.price_ht = price_ht
         self.tva = tva
-        self.description = description
         self.brand_id = brand_id
         self.category_id = category_id
         self.created_at = datetime.now(timezone.utc)
@@ -51,8 +51,9 @@ class ProductSchema(SQLAlchemyAutoSchema):
         unknown = EXCLUDE
         include_fk = True
 
-    images = fields.Nested(ProductImagesSchema, many=True, only=['image_url', 'alt_text'])
+    images = fields.Nested(ProductImagesSchema, many=True, only=['image_url', 'alt_text', 'main_image'])
     alt_text = fields.String(allow_none=True)
     brand = fields.Nested(BrandSchema, only=['name'])
     category = fields.Nested(CategorySchema, only=['name'])
     collection = fields.Nested(CollectionSchema, only=['name'])
+    features = fields.Nested(ProductFeaturesSchema, only=['label'], many=True)
