@@ -101,3 +101,9 @@ class UserGetSchema(UserSchema):
     birth_date = fields.Str(required=False)
     username = fields.Str(required=False)
 
+
+class ShippingAddressPutSchema(Schema):
+    street = fields.Str(required=False)
+    city = fields.Str(required=False)
+    country = fields.Str(required=False)
+    postal = fields.Str(required=False)

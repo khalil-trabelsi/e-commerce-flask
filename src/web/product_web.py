@@ -11,6 +11,7 @@ from src.models.product import ProductSchema
 from marshmallow_jsonschema import JSONSchema
 
 from src.models.product_images import ProductImagesSchema
+from src.models.product_review import ProductReviewSchema
 from src.web.schema import ProductImagePostArgsSchema
 from src.helpers.FileConf import get_upload_folder
 
@@ -46,6 +47,17 @@ product_images_post_model = product_api.schema_model(
 upload_parser = product_api.parser()
 upload_parser.add_argument('files', location='files', type=FileStorage, required=True, action='append', help='Fichiers à uploader')
 upload_parser.add_argument('main_image', type=str, required=True)
+
+product_review_post_schema = ProductReviewSchema(only=('title', 'comment', 'rating', 'user_id', 'username'))
+product_review_post_model = product_api.schema_model(
+    'ProductReviewModel', JSONSchema().dump(product_review_post_schema)['definitions']['ProductReviewSchema']
+)
+
+
+product_review_get_schema = ProductReviewSchema()
+product_review_get_model = product_api.schema_model(
+    'ProductReviewGetModel', JSONSchema().dump(product_review_post_schema)['definitions']['ProductReviewSchema']
+)
 
 
 @product_api.route('')
@@ -103,4 +115,25 @@ class ProductUploadWeb(Resource):
             return paths, 201
         except Exception as e:
             return {'error': str(e)}, 500
+
+
+@product_api.route('/<int:product_id>/review')
+class ProductReviewWeb(Resource):
+
+    @product_api.response(200, 'Success', [product_get_model])
+    @product_api.response(500, 'Internal Server Error')
+    def get(self, product_id):
+        product_reviews = ProductHandler.get_product_review(product_id)
+        return product_review_get_schema.dump(product_reviews, many=True), 200
+
+    @product_api.response(200, 'Success', product_review_post_model)
+    def post(self, product_id: int):
+        try:
+            data = product_review_post_schema.load(request.json)
+        except ValidationError as e:
+            return {'error': str(e)}, 400
+
+        product_review = ProductHandler.add_product_review(product_id=product_id, **data)
+
+        return  product_review_post_schema.dump(product_review), 200
 

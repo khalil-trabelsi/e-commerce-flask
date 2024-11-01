@@ -1,11 +1,13 @@
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
-from marshmallow import EXCLUDE
+from marshmallow import EXCLUDE, fields
 from logging import getLogger
 
 from db import db
+from .shipping_address import ShippingAddressSchema
 from .user import User
 
 logger = getLogger(__name__)
+
 
 class Customer(User):
     __tablename__ = 'customers'
@@ -14,6 +16,7 @@ class Customer(User):
     last_name = db.Column(db.String(80), unique=True, nullable=True)
     phone_number = db.Column(db.String(80), unique=True, nullable=True)
     birth_date = db.Column(db.Date, nullable=True)
+    shipping_address = db.relationship('ShippingAddress', backref='customer', lazy='joined')
 
     def __init__(self, first_name, last_name, phone_number, birth_date, email, password, gender, role_id):
         logger.info(role_id)
@@ -34,3 +37,5 @@ class CustomerSchema(SQLAlchemyAutoSchema):
         include_fk = True
         register = True
         unknown = EXCLUDE
+
+    shipping_address = fields.Nested(ShippingAddressSchema)

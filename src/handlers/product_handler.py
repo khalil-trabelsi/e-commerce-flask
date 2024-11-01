@@ -11,6 +11,8 @@ from db import db
 from src.models.product import Product
 from src.helpers.FileConf import allowed_file, get_upload_folder
 from src.models.product_feature import ProductFeatures
+from src.models.product_review import ProductReview
+from src.models.user import User
 
 from src.models.product_images import ProductImages
 
@@ -84,3 +86,21 @@ class ProductHandler:
 
         return paths
 
+    @classmethod
+    def add_product_review(cls, product_id: int, title: str, comment: str, rating: int, user_id: Optional[int] = None, username: Optional[str] = None):
+        logger.info(user_id)
+        if user_id is not None:
+            user = User.query.filter_by(id=user_id).first_or_404()
+            product_review = ProductReview(product_id=product_id, title=title, comment=comment, rating=rating, user_id=user.id)
+
+        else:
+            product_review = ProductReview(product_id=product_id, title=title, comment=comment, rating=rating, username=username)
+
+        db.session.add(product_review)
+        db.session.commit()
+
+        return product_review
+
+    @classmethod
+    def get_product_review(cls, product_id):
+        return ProductReview.query.filter_by(product_id=product_id).all()

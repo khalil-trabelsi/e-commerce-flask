@@ -60,7 +60,6 @@ class CategoryCollectionWeb(Resource):
 
 @category_api.route('/aggregated')
 class CategoryAggregatedWeb(Resource):
-    @jwt_required()
     @category_api.response(200, 'Success', [category_aggregated_get_model])
     @category_api.response(500, 'Internal Server Error')
     def get(self):

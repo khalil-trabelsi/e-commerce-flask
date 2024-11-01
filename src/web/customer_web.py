@@ -5,6 +5,7 @@ from logging import getLogger
 from marshmallow_jsonschema import JSONSchema
 
 from src.handlers.user_handler import UserHandler
+from src.handlers.shipping_handler import ShippingHandler
 from src.handlers.auth_handler import AuthHandler
 from .admin_web import (
     user_get_schema,
@@ -14,7 +15,8 @@ from .admin_web import (
 )
 from ..models.customer import CustomerSchema
 
-from .schema import CustomerPostArgsSchema
+from .schema import CustomerPostArgsSchema, ShippingAddressPutSchema
+from .shipping_web import shipping_get_model, shipping_get_schema
 
 logger = getLogger(__name__)
 
@@ -30,6 +32,10 @@ customer_post_model = customer_api.schema_model(
     'CustomerPostModel', JSONSchema().dump(customer_post_schema)['definitions']['CustomerPostArgsSchema']
 )
 
+shipping_address_put_schema = ShippingAddressPutSchema()
+shipping_address_put_model = customer_api.schema_model(
+    'ShippingAddressPutModel', JSONSchema().dump(shipping_address_put_schema)['definitions']['ShippingAddressPutSchema']
+)
 @customer_api.route('')
 class CustomerCollectionWeb(Resource):
     @jwt_required()
@@ -91,4 +97,26 @@ class CustomerWeb(Resource):
             return user_get_schema.dump(customer), 200
         except Exception as err:
             return {'error': str(err)}, 500
+
+
+@customer_api.route('/<int:customer_id>/shipping_address')
+class CustomerWeb(Resource):
+    @jwt_required()
+    @customer_api.response(200, 'Success', shipping_get_model)
+    @customer_api.response(500, 'Internal Server Error')
+    def get(self, customer_id):
+        shipping_address = ShippingHandler.get_shipping_address_by_customer_id(customer_id)
+        return shipping_get_schema.dump(shipping_address), 200
+
+    @jwt_required()
+    @customer_api.response(200, 'Success', shipping_address_put_model)
+    @customer_api.response(500, 'Internal Server Error')
+    def put(self, customer_id):
+        try:
+            data = shipping_address_put_schema.load(request.json)
+        except ValidationError as err:
+            return {'error': str(err)}, 400
+
+        updated_shipping_address = ShippingHandler.edit_shipping_address(customer_id, **data)
+        return shipping_address_put_schema.dump(updated_shipping_address), 200
 

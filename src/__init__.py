@@ -74,6 +74,7 @@ def create_app(config_name):
     from src.web.customer_web import customer_api
     from src.web.collection_web import collection_api
     from src.web.uploaded_file_web import uploaded_file_api
+    from src.web.shipping_web import shipping_api
 
     api.add_namespace(admin_api)
     api.add_namespace(auth_api)
@@ -86,6 +87,7 @@ def create_app(config_name):
     api.add_namespace(customer_api)
     api.add_namespace(collection_api)
     api.add_namespace(uploaded_file_api)
+    api.add_namespace(shipping_api)
 
     # identify authenticated user
     @jwtManager.user_identity_loader
